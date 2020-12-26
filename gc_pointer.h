@@ -130,25 +130,32 @@ Pointer<T,size>::Pointer(T *t){
     else
         isArray = false;
 }
+
 // Copy constructor.
 template< class T, int size>
-Pointer<T,size>::Pointer(const Pointer &ob) :
-    addr{new T[ob.arraySize]}, isArray{ob.isArray}, arraySize{ob.arraySize} {
+Pointer<T,size>::Pointer(const Pointer &ob) {
+    list<Pointer<T, size>> ptrItr;
+    ptrItr = findPtrInfo(ob.addr);
+    ptrItr->refCount++;
 
-    // TODO: Implement Pointer constructor
-    // Lab: Smart Pointer Project Lab
-
-    std::copy(ob.addr, ob.addr+ob.arraySize, addr);
+    this->addr = ob.addr;
+    this->arraySize = ob.arraySize;
+    if (this->arraySize > 0)
+        this->isArray = true;
+    else
+        this->isArray = false;
 }
 
 // Destructor for Pointer.
 template <class T, int size>
 Pointer<T, size>::~Pointer(){
 
-    // TODO: Implement Pointer destructor
-    // Lab: New and Delete Project Lab
-
     std::cout << "Pointer Destructor is called" << std::endl;
+
+    std::list<Pointer<T>>::iterator ptrItr;
+    ptrItr = findPtrInfo(this->addr);
+    if (ptrItr->refCount > 0)
+        ptrItr->refCount--;
 
     collect();
 }
