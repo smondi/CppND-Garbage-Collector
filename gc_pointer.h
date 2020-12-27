@@ -94,7 +94,7 @@ public:
 // STATIC INITIALIZATION
 // Creates storage for the static variables
 template <class T, int size>
-std::list<PtrDetails<T> > Pointer<T, size>::refContainer;
+std::list<PtrDetails<T>> Pointer<T, size>::refContainer;
 template <class T, int size>
 bool Pointer<T, size>::first = true;
 
@@ -111,16 +111,16 @@ Pointer<T,size>::Pointer(T *t){
         atexit(shutdown);
     first = false;
 
-    std::list<PtrDetails<T>>::iterator pItr;
+    typename std::list<PtrDetails<T>>::iterator ptrItr;
 
     // Find pointer in pointers list
-    pItr = findPtrInfo(t);
+    ptrItr = findPtrInfo(t);
 
-    if (pItr != pItr.end()) {
-        pItr->refCount++;
+    if (ptrItr != refContainer.end()) {
+        ptrItr->refcount++;
     } else {
-        Pointer<T> newPtr(t, size);
-        this->refContainer.push_back(newPtr);
+        PtrDetails<T> newPtr(t, size);
+        refContainer.push_back(newPtr);
     }
 
     addr = t;
@@ -134,9 +134,9 @@ Pointer<T,size>::Pointer(T *t){
 // Copy constructor.
 template< class T, int size>
 Pointer<T,size>::Pointer(const Pointer &ob) {
-    list<Pointer<T, size>> ptrItr;
+    typename std::list<PtrDetails<T>>::iterator ptrItr;
     ptrItr = findPtrInfo(ob.addr);
-    ptrItr->refCount++;
+    ptrItr->refcount++;
 
     this->addr = ob.addr;
     this->arraySize = ob.arraySize;
@@ -152,10 +152,10 @@ Pointer<T, size>::~Pointer(){
 
     std::cout << "Pointer Destructor is called" << std::endl;
 
-    std::list<Pointer<T>>::iterator ptrItr;
+    typename std::list<PtrDetails<T>>::iterator ptrItr;
     ptrItr = findPtrInfo(this->addr);
-    if (ptrItr->refCount > 0)
-        ptrItr->refCount--;
+    if (ptrItr->refcount > 0)
+        ptrItr->refcount--;
 
     collect();
 }
@@ -165,29 +165,25 @@ Pointer<T, size>::~Pointer(){
 template <class T, int size>
 bool Pointer<T, size>::collect(){
 
-    // TODO: Implement collect function
-    // LAB: New and Delete Project Lab
-    // Note: collect() will be called in the destructor
-
     bool memfreed = false;
-    typename std::list<PtrDetails<T>>::iterator p;
-    
+    typename std::list<PtrDetails<T>>::iterator ptrItr;    
 
     do {
-        for (p = refContainer.begin(); p != refContainer.end(); ++p) {
-            if (p->refcount != 0 && p->memPtr != nullptr) {
-                p->isArray ? delete[] p->memPtr : delete p->memPtr;
-                //refContainer.erase(p);
-                memfreed = true;                
-            }
+        for (ptrItr = refContainer.begin(); ptrItr != refContainer.end(); ++ptrItr) {
+            if (ptrItr->refcount > 0)
+                continue;
+            memfreed = true;
+            refContainer.remove(*ptrItr);
+
+            if (ptrItr->isArray)
+                delete[] ptrItr->memPtr;
+            else
+                delete ptrItr->memPtr;
+            
+            break;   
         }
-       
-
-
-    } while (p != refContainer.end());
-
-
-
+    } while (ptrItr != refContainer.end());
+    
     return memfreed;
 }
 
