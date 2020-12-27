@@ -174,12 +174,10 @@ bool Pointer<T, size>::collect(){
                 continue;
             memfreed = true;
             refContainer.remove(*ptrItr);
-
             if (ptrItr->isArray)
                 delete[] ptrItr->memPtr;
             else
-                delete ptrItr->memPtr;
-            
+                delete ptrItr->memPtr;            
             break;   
         }
     } while (ptrItr != refContainer.end());
@@ -190,20 +188,22 @@ bool Pointer<T, size>::collect(){
 // Overload assignment of pointer to Pointer.
 template <class T, int size>
 T *Pointer<T, size>::operator=(T *t){
+    typename std::list<PtrDetails<T>>::iterator ptrItr;
 
-    // TODO: Implement operator==
-    // LAB: Smart Pointer Project Lab
+    ptrItr = findPtrInfo(this->addr);
+    ptrItr->refcount--;
 
-    //std::cout << "Pointer Copy assignment called" << std::endl;
-
-    if (findPtrInfo(t) != refContainer.end()) {
-        std::cout << "Found" << std::endl;
+    ptrItr = findPtrInfo(t);
+    if (ptrItr != refContainer.end()) {
+        ptrItr->refcount--;
     } else {
-        std::cout << "Not Found" << std::endl;
+        Pointer<T, size> newPtr(t, size);
+        refContainer.push_back(newPtr);
     }
 
+    addr = t;
     
-    return *this;
+    return this;
 }
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
