@@ -208,19 +208,17 @@ T *Pointer<T, size>::operator=(T *t){
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
 Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rhs){
+    typename std::list<PtrDetails<T>>::iterator ptrItr;
 
-    // TODO: Implement operator==
-    // LAB: Smart Pointer Project Lab
+    ptrItr = findPtrInfo(this->addr);
+    ptrItr->refcount--;
 
-    std::cout << "** Pointer Copy Assignment is called" << std::endl;
+    ptrItr = findPtrInfo(rhs.addr);
+    ptrItr->refcount++;
 
-    if (findPtrInfo(rhs) != refContainer.end()) {
-        std::cout << "Found" << std::endl;
-    } else {
-        std::cout << "Not Found" << std::endl;
-    }
+    this->addr = rhs.addr;
 
-    return *this;
+    return rhs;
 
 }
 
