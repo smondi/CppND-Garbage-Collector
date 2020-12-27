@@ -103,9 +103,6 @@ bool Pointer<T, size>::first = true;
 
 template<class T,int size>
 Pointer<T,size>::Pointer(T *t){
-
-    std::cout << "Pointer Constructor Called" << std::endl;
-
     // Register shutdown() as an exit function.
     if (first)
         atexit(shutdown);
@@ -149,9 +146,6 @@ Pointer<T,size>::Pointer(const Pointer &ob) {
 // Destructor for Pointer.
 template <class T, int size>
 Pointer<T, size>::~Pointer(){
-
-    std::cout << "Pointer Destructor is called" << std::endl;
-
     typename std::list<PtrDetails<T>>::iterator ptrItr;
     ptrItr = findPtrInfo(this->addr);
     if (ptrItr->refcount > 0)
